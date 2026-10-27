@@ -1,0 +1,69 @@
+﻿{
+  "invoice": [
+    {
+      "sku": "M-101",
+      "quantity": 10,
+      "unit_price": 1250
+    },
+    {
+      "sku": "D-205",
+      "quantity": 3,
+      "unit_price": 3900
+    },
+    {
+      "sku": "K-330",
+      "quantity": 6,
+      "unit_price": 800
+    }
+  ],
+  "offers": [
+    {
+      "supplier": "Альфа",
+      "sku": "M-101",
+      "unit_price": 1180,
+      "stock": 12
+    },
+    {
+      "supplier": "Бета",
+      "sku": "M-101",
+      "unit_price": 1100,
+      "stock": 4
+    },
+    {
+      "supplier": "Вега",
+      "sku": "M-101",
+      "unit_price": 1190,
+      "stock": 100
+    },
+    {
+      "supplier": "Альфа",
+      "sku": "D-205",
+      "unit_price": 3600,
+      "stock": 2
+    },
+    {
+      "supplier": "Бета",
+      "sku": "D-205",
+      "unit_price": 3650,
+      "stock": 5
+    },
+    {
+      "supplier": "Вега",
+      "sku": "D-205",
+      "unit_price": 3550,
+      "stock": 1
+    },
+    {
+      "supplier": "Альфа",
+      "sku": "K-330",
+      "unit_price": 760,
+      "stock": 0
+    },
+    {
+      "supplier": "Бета",
+      "sku": "K-330",
+      "unit_price": 810,
+      "stock": 6
+    }
+  ]
+}
