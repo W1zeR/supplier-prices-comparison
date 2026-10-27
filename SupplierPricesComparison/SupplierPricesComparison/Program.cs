@@ -19,6 +19,61 @@ namespace SupplierPricesComparison
 
             var path = args.Length > 0 ? args[0] : "input.json";
 
+            (var isDataCorrect, var data) = LoadData(path);
+
+            if (!isDataCorrect)
+            {
+                return 1;
+            }
+
+            var warnings = new List<string>();
+
+            RemoveInvalid(data!, warnings);
+
+            Console.WriteLine($"{"Артикул",-8}{"Кол-во",8}{"Было",10}  {"Поставщик",-18}{"Станет",10}{"Экономия",10}");
+            Console.WriteLine(new string('-', 66));
+
+            decimal totalSavings = 0;
+
+            foreach (var item in data!.Invoice)
+            {
+                totalSavings += ProcessInvoiceItem(item, data.Offers);
+            }
+
+            Console.WriteLine(new string('-', 66));
+            Console.WriteLine($"Суммарная потенциальная экономия: {Money(totalSavings)} рублей");
+
+            foreach (var w in warnings)
+                Console.WriteLine("Предупреждение: " + w);
+
+            return 0;
+        }
+
+        static decimal ProcessInvoiceItem(InvoiceItem item, List<Offer> offers)
+        {
+            Offer? best = FindBestOffer(item, offers);
+
+            var (supplier, newPrice, savings) = CalculateSavings(item, best);
+
+            PrintRow(item, supplier, newPrice, savings);
+
+            return savings;
+        }
+
+        static (string supplier, decimal newPrice, decimal savings) CalculateSavings(InvoiceItem item, Offer? best)
+        {
+            if (best == null)
+            {
+                return ("оставить текущего", item.UnitPrice, 0);
+            }
+
+            decimal savings = (item.UnitPrice - best.UnitPrice) * item.Quantity;
+
+            return (best.Supplier, best.UnitPrice, savings);
+        }
+
+        static (bool isSuccess, InputData? data) LoadData(string path)
+        {
             InputData? data;
 
             try
@@ -29,52 +84,22 @@ namespace SupplierPricesComparison
             {
                 Console.WriteLine($"Не удалось прочитать {path}: {ex.Message}");
 
-                return 1;
+                return (false, null);
             }
 
             if (data == null)
             {
                 Console.WriteLine("Файл пустой");
 
-                return 1;
+                return (false, null);
             }
 
-            var warnings = new List<string>();
+            return (true, data);
+        }
 
-            RemoveInvalid(data, warnings);
-
-            Console.WriteLine($"{"Артикул",-8}{"Кол-во",8}{"Было",10}  {"Поставщик",-18}{"Станет",10}{"Экономия",10}");
-            Console.WriteLine(new string('-', 66));
-
-            decimal totalSavings = 0;
-
-            foreach (var item in data.Invoice)
-            {
-                Offer? best = FindBestOffer(item, data.Offers);
-
-                string supplier = "оставить текущего";
-                decimal newPrice = item.UnitPrice;
-                decimal savings = 0;
-
-                if (best != null)
-                {
-                    supplier = best.Supplier;
-                    newPrice = best.UnitPrice;
-                    savings = (item.UnitPrice - newPrice) * item.Quantity;
-                }
-
-                totalSavings += savings;
-
-                Console.WriteLine($"{item.Sku,-8}{item.Quantity,8}{Money(item.UnitPrice),10}  {supplier,-18}{Money(newPrice),10}{Money(savings),10}");
-            }
-
-            Console.WriteLine(new string('-', 66));
-            Console.WriteLine($"Суммарная потенциальная экономия: {Money(totalSavings)} рублей");
-
-            foreach (var w in warnings)
-                Console.WriteLine("Предупреждение: " + w);
-
-            return 0;
+        static void PrintRow(InvoiceItem item, string supplier, decimal newPrice, decimal savings)
+        {
+            Console.WriteLine($"{item.Sku,-8}{item.Quantity,8}{Money(item.UnitPrice),10}  {supplier,-18}{Money(newPrice),10}{Money(savings),10}");
         }
 
         static Offer? FindBestOffer(InvoiceItem item, List<Offer> offers)
